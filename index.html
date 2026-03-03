@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RMUTL TAK Display</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+body{
+    background:#f2f2f2;
+    color:#222;
+}
+
+/* ===== HERO ===== */
+.hero{
+    position:relative;
+    width:100%;
+    height:460px;
+    background-image: url("EL.jpg");
+    background-size:cover;
+    background-position:center;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.hero-overlay{
+    position:absolute;
+    width:100%;
+    height:100%;
+    background: linear-gradient(
+        rgba(139,94,0,0.85),
+        rgba(139,94,0,0.65)
+    );
+}
+
+.hero-content{
+    position:relative;
+    text-align:center;
+    color:white;
+}
+
+.hero-logo img{
+    width:120px;
+    margin-bottom:30px;
+}
+
+.hero-content h1{
+    font-size:52px;
+}
+
+.hero-content p{
+    font-size:28px;
+    margin-top:10px;
+}
+
+/* ===== CONTENT ===== */
+.container{
+    display:flex;
+    padding:80px;
+    gap:80px;
+}
+
+.left{ flex:1; }
+
+.time-title{
+    font-size:42px;
+    margin-bottom:20px;
+}
+
+#clock{
+    font-size:160px;
+    font-weight:bold;
+    color:#8B5E00;
+}
+
+#date{
+    font-size:36px;
+    margin-top:10px;
+}
+
+.weather{
+    margin-top:30px;
+    font-size:30px;
+    display:flex;
+    gap:50px;
+    color:#8B5E00;
+}
+
+/* ===== RIGHT ===== */
+.right{ flex:1; }
+
+.news-title{
+    font-size:42px;
+    color:#8B5E00;
+    margin-bottom:30px;
+}
+
+/* ===== UPLOAD + SLIDER (รวมบล็อกเดียว) ===== */
+.slider{
+    position:relative;
+    width:110%;
+    aspect-ratio:16/9;
+    border:3px dashed #cfcfcf;
+    border-radius:30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    overflow:hidden;
+    background:#fafafa;
+}
+
+.slider img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:none;
+}
+
+#uploadText{
+    font-size:26px;
+    color:#666;
+}
+
+/* ลูกศร */
+.nav{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    background:rgba(0,0,0,0.5);
+    color:white;
+    border:none;
+    font-size:40px;
+    padding:10px 18px;
+    cursor:pointer;
+    border-radius:50%;
+    opacity:0;
+    transition:0.3s;
+}
+
+.slider:hover .nav{
+    opacity:1;
+}
+
+.prev{ left:20px; }
+.next{ right:20px; }
+
+.nav:hover{
+    background:rgba(0,0,0,0.8);
+}
+</style>
+</head>
+
+<body>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <div class="hero-logo">
+            <img src="rmutl.png">
+        </div>
+        <h1>สาขาวิชาวิศวกรรมอิเล็กทรอนิกส์</h1>
+        <p>มหาวิทยาลัยเทคโนโลยีราชมงคลล้านนา ตาก</p>
+    </div>
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+
+    <!-- LEFT -->
+    <div class="left">
+        <div class="time-title">เวลาในประเทศไทย</div>
+        <div id="clock"></div>
+        <div id="date"></div>
+
+        <div class="weather">
+            <div>🌡 อุณหภูมิ: 28.6°C</div>
+            <div>💧 ความชื้น: 65.6%</div>
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+        <div class="news-title">ข่าวประชาสัมพันธ์</div>
+
+        <div class="slider" id="slider"
+             onclick="document.getElementById('imageUpload').click()">
+
+            <span id="uploadText">
+                คลิกเพื่ออัปโหลดรูปข่าว (แนะนำขนาด 16:9)
+            </span>
+
+            <img id="slideImage">
+
+            <button class="nav prev">&#10094;</button>
+            <button class="nav next">&#10095;</button>
+        </div>
+
+        <input type="file" id="imageUpload" accept="image/*" multiple hidden>
+    </div>
+
+</div>
+
+<script>
+/* CLOCK */
+function updateClock(){
+    const now = new Date();
+    const options = {
+        weekday:'long',
+        year:'numeric',
+        month:'long',
+        day:'numeric'
+    };
+
+    document.getElementById("clock").innerText =
+        now.toLocaleTimeString('th-TH');
+
+    document.getElementById("date").innerText =
+        now.toLocaleDateString('th-TH', options);
+}
+setInterval(updateClock,1000);
+updateClock();
+
+/* SLIDER SYSTEM */
+let images = [];
+let currentIndex = 0;
+let slideInterval;
+
+const upload = document.getElementById("imageUpload");
+const slideImage = document.getElementById("slideImage");
+const uploadText = document.getElementById("uploadText");
+const prevBtn = document.querySelector(".prev");
+const nextBtn = document.querySelector(".next");
+
+upload.addEventListener("change", function(e){
+
+    const files = e.target.files;
+
+    for(let i=0;i<files.length;i++){
+        images.push(URL.createObjectURL(files[i]));
+    }
+
+    if(images.length > 0){
+        uploadText.style.display = "none";
+        slideImage.style.display = "block";
+        showImage(currentIndex);
+        startSlider();
+    }
+
+    upload.value = "";
+});
+
+function showImage(index){
+    if(index < 0) index = images.length - 1;
+    if(index >= images.length) index = 0;
+
+    currentIndex = index;
+    slideImage.src = images[currentIndex];
+}
+
+function nextImage(){
+    showImage(currentIndex + 1);
+}
+
+function prevImage(){
+    showImage(currentIndex - 1);
+}
+
+function startSlider(){
+    clearInterval(slideInterval);
+    slideInterval = setInterval(nextImage, 5000);
+}
+
+nextBtn.addEventListener("click", function(e){
+    e.stopPropagation();
+    nextImage();
+    startSlider();
+});
+
+prevBtn.addEventListener("click", function(e){
+    e.stopPropagation();
+    prevImage();
+    startSlider();
+});
+</script>
+
+</body>
+</html>
